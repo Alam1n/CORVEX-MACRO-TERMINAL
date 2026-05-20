@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-terminal-bg: #020305;
+  --color-terminal-card: #0f172a;
+}
+
+
+/* Base Body Fix */
+body {
+  background-color: #020305;
+  color: #ffffff;
+}
+
+/* Heatmap Fixes */
+.heat-strong-up { 
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.15) 0%, transparent 100%);
+  @apply border-l-4 border-green-500;
+}
+
+.heat-strong-down { 
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, transparent 100%);
+  @apply border-l-4 border-red-500;
+}
+
+/* NEW: Neutral Visibility Class */
+.heat-neutral {
+  background: rgba(30, 41, 59, 0.3); /* Slight blue-gray tint */
+  @apply border-l-4 border-slate-600;
+}
+
+/* Pair Card Enhancements */
+.terminal-card {@import "tailwindcss";
+
+body, html, h1,#root {@import "tailwindcss";
+
+/* 1. GLOBAL RESET: Kill the white line and force black background */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none !important; /* Removes the "white line" focus ring */
+}
+
+hhtml, body, #root {
+  background-color: #02040a !important;
+  color: #ffffff;
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* 2. HEADER & SUBHEADER COLORS */
+h1 {
+  color: #3b82f6 !important; /* Electric Blue */
+  text-transform: uppercase;
+}
+
+h2 {
+  color: #64748b !important; /* Muted Slate for Section Headers */
+  font-weight: 800;
+}
+
+/* 3. THE CONTAINER FIX: Changing the "White Line" to Dark Blue-Gray */
+.terminal-card {
+  background-color: #0b111a;
+  /* This color (#111827) removes the "white" appearance */
+  border: 1px solid #111827; 
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* 4. NAVIGATION BORDER FIX */
+nav {
+  border-bottom: 1px solid #111827 !important;
+}
+
+/* 4. SIGNAL COLORS (High Contrast) */
+.signal-strong-buy, .signal-buy {
+  color: #4ade80 !important; /* Bright Green */
+}
+
+.signal-strong-sell, .signal-sell {
+  color: #f87171 !important; /* Bright Red */
+}
+
+.signal-neutral {
+  color: #94a3b8 !important; /* Slate Blue */
+}
+
+/* 5. HEATMAP ROWS */
+.heat-strong-up { 
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #22c55e;
+}
+
+.heat-strong-down { 
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, transparent 100%);
+  border-left: 4px solid #ef4444;
+}
+
+/* 6. PROGRESS BAR */
+.progress-bg {
+  background-color: #010204;
+  height: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+}
+  background-color: #02040a !important;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace; /* Best for Terminal look */
+}
+
+.terminal-card {
+  @apply bg-[#0b111a] border border-slate-800 rounded-lg overflow-hidden;
+}
+
+/* High Contrast Signal Styling */
+.signal-strong-buy, .signal-buy {
+  color: #4ade80; /* Bright Green */
+}
+
+.signal-strong-sell, .signal-sell {
+  color: #f87171; /* Bright Red */
+}
+
+.signal-neutral {
+  color: #94a3b8; /* Slate Blue */
+}
+
+/* Diamonds alignment */
+h1.tracking-widest {
+  word-break: break-all;
+  line-height: 1;
+}
+  @apply bg-[#0f172a] border border-slate-700 shadow-[0_4px_20px_rgba(,0,0,0.6)];
+}
+
+/* Progress bar background needs to be lighter so the bar is visible */
+.progress-bg {
+  @apply bg-slate-950 h-2 rounded-full border border-slate-800 overflow-hidden;
+}
