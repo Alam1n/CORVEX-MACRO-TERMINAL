@@ -26,7 +26,8 @@ const App = () => {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post('http://127.0.0.1:5000https://capitalize-backend.onrender.com/api/login', loginData);
+      // ✅ FIXED: Removed the smashed local url prefix
+      const res = await axios.post('https://capitalize-backend.onrender.com/api/login', loginData);
       const newToken = res.data.access_token;
       localStorage.setItem('token', newToken);
       setToken(newToken);
@@ -36,25 +37,32 @@ const App = () => {
   };
 
   const fetchDashboard = async () => {
-  // 1. Explicitly grab the token from localStorage so it's never undefined
-  const currentToken = localStorage.getItem('token'); 
-  if (!currentToken) return;
-
-  setLoading(true);
-  try {
-    const res = await axios.get('https://capitalize-backend.onrender.com/api/dashboard', {
-    headers: {
-        'Authorization': `Bearer ${token}` // <--- Where is 'token' coming from here?
+    const currentToken = localStorage.getItem('token'); 
+    
+    // ✅ GUARD RAIL: If the storage token is missing or explicitly stringified as 'undefined', halt!
+    if (!currentToken || currentToken === 'undefined') {
+      setToken(null);
+      return;
     }
-});
-    setData(res.data);
-  } catch (err) { 
-    if (err.response?.status === 401) handleLogout();
-    console.error("API Error:", err); 
-  }
-  setLoading(false);
-};
 
+    setLoading(true);
+    try {
+      const res = await axios.get('https://capitalize-backend.onrender.com/api/dashboard', {
+        headers: {
+          // ✅ FIXED: Now correctly pointing to 'currentToken' instead of the stale 'token' state
+          'Authorization': `Bearer ${currentToken}` 
+        }
+      });
+      setData(res.data);
+    } catch (err) { 
+      console.error("API Error:", err); 
+      // Force exit out of stale/unauthorized tokens
+      if (err.response?.status === 401 || err.response?.status === 422) {
+        handleLogout();
+      }
+    }
+    setLoading(false);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -62,10 +70,14 @@ const App = () => {
     setData(null);
   };
 
-  useEffect(() => { if (token) fetchDashboard(); }, [token]);
+  useEffect(() => { 
+    if (token && token !== 'undefined') {
+      fetchDashboard(); 
+    } 
+  }, [token]);
 
   // --- LOGIN VIEW ---
-  if (!token) {
+  if (!token || token === 'undefined') {
     return (
       <div style={styles.wrapper}>
         <div style={{...styles.body, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh'}}>
@@ -99,6 +111,7 @@ const App = () => {
     </div>
   );
   
+  // --- DASHBOARD TERMINAL VIEW ---
   return (
     <div style={styles.wrapper}>
       <div style={styles.body}>
@@ -115,6 +128,9 @@ const App = () => {
               <span>DATE: {data?.timestamp?.split('T')[0] || new Date().toISOString().split('T')[0]}</span>
               <button onClick={fetchDashboard} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <RefreshCw size={10}/> RE-SYNC
+              </button>
+              <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+                LOGOUT
               </button>
             </div>
           </nav>
@@ -161,7 +177,7 @@ const App = () => {
             </section>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
-                {/* INDICES BIAS (Handles NAS100, SP500, and US30 automatically) */}
+                {/* INDICES BIAS */}
                 <section>
                     <h2 style={styles.h2}><TrendingUp size={14}/> [ 📈 INDICES BIAS ]</h2>
                     <div style={{ display: 'grid', gap: '10px', marginBottom: '24px' }}>
@@ -189,7 +205,7 @@ const App = () => {
             </div>
           </div>
 
-          {/* CURRENCY PAIRS (New Section) */}
+          {/* CURRENCY PAIRS */}
           <section style={{ marginTop: '24px' }}>
             <h2 style={styles.h2}>[ ⚖️ CURRENCY PAIRS BIAS ]</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
@@ -223,27 +239,28 @@ const App = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '24px', marginTop: '24px' }}>
           
           {/* NEWS FEED */}
-        <section>
-          <h2 style={styles.h2}>[ 📰 LATEST INTELLIGENCE ]</h2>
-          <div style={styles.card}>
-            {data?.news && data.news.length > 0 ? (
-              data.news.map((item, i) => (
-                <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #1e293b', fontSize: '12px', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ 
-                    color: item.sentiment > 0 ? '#4ade80' : item.sentiment < 0 ? '#f87171' : '#94a3b8', 
-                    marginRight: '10px',
-                    fontWeight: 'bold'
-                  }}>
-                    {item.sentiment > 0 ? '▲' : item.sentiment < 0 ? '▼' : '●'}
-                  </span>
-                  <span style={{ color: '#e2e8f0' }}>{item.title}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: '#64748b', fontSize: '12px', padding: '10px' }}>📡 No live headlines detected...</div>
-            )}
-          </div>
-        </section>
+          <section>
+            <h2 style={styles.h2}>[ 📰 LATEST INTELLIGENCE ]</h2>
+            <div style={styles.card}>
+              {data?.news && data.news.length > 0 ? (
+                data.news.map((item, i) => (
+                  <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #1e293b', fontSize: '12px', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ 
+                      color: item.sentiment > 0 ? '#4ade80' : item.sentiment < 0 ? '#f87171' : '#94a3b8', 
+                      marginRight: '10px',
+                      fontWeight: 'bold'
+                    }}>
+                      {item.sentiment > 0 ? '▲' : item.sentiment < 0 ? '▼' : '●'}
+                    </span>
+                    <span style={{ color: '#e2e8f0' }}>{item.title}</span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ color: '#64748b', fontSize: '12px', padding: '10px' }}>📡 No live headlines detected...</div>
+              )}
+            </div>
+          </section>
+
           {/* CALENDAR */}
           <section>
             <h2 style={styles.h2}>[ 📅 UPCOMING EVENTS ]</h2>
